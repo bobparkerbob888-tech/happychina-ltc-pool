@@ -1,0 +1,136 @@
+# ============================================================
+# HappyChina Pool - Configuration Template
+# ============================================================
+# Copy this file to config.toml and edit the values below.
+# All RPC URLs should point to your running coin daemons.
+# Replace YOUR_*_ADDRESS with your actual wallet addresses.
+# ============================================================
+
+[pool]
+name = "HappyChina Pool"
+fee_percent = 1.0
+pplns_window = 100000
+block_confirmation_depth = 100
+pool_address = "YOUR_LTC_ADDRESS"
+api_port = 8090
+
+[stratum]
+ports = [
+    { port = 3332, difficulty = 1000000.0, vardiff = false, name = "ASIC Fixed 1M" },
+    { port = 3333, difficulty = 1000000.0, vardiff = true, name = "ASIC Vardiff 1M" },
+    { port = 3334, difficulty = 2000000000.0, vardiff = false, name = "Mega Fixed 2B" },
+    { port = 3335, difficulty = 500000000.0, vardiff = true, name = "Mega Vardiff 500M" },
+]
+listen_address = "0.0.0.0"
+min_difficulty = 0.001
+max_difficulty = 5000000000.0
+vardiff_target_time = 10.0
+vardiff_retarget_shares = 12
+connection_timeout_secs = 300
+max_connections = 10000
+
+[database]
+url = "postgres://pool:pool@postgres:5432/happychain"
+
+# ── Parent Chain ────────────────────────────────────────────
+
+[[coins]]
+name = "litecoin"
+reward_address = "YOUR_LTC_ADDRESS"
+symbol = "LTC"
+rpc_url = "http://host.docker.internal:9332"
+rpc_user = "YOUR_RPC_USER"
+rpc_password = "YOUR_RPC_PASSWORD"
+is_parent = true
+block_reward = 6.25
+confirmation_depth = 100
+
+# ── Auxiliary (Merge-Mined) Chains ──────────────────────────
+
+[[coins]]
+name = "dogecoin"
+reward_address = "YOUR_DOGE_ADDRESS"
+symbol = "DOGE"
+rpc_url = "http://host.docker.internal:22555"
+rpc_user = "YOUR_RPC_USER"
+rpc_password = "YOUR_RPC_PASSWORD"
+is_parent = false
+block_reward = 10000.0
+confirmation_depth = 240
+
+[[coins]]
+name = "pepecoin"
+reward_address = "YOUR_PEPE_ADDRESS"
+symbol = "PEPE"
+rpc_url = "http://host.docker.internal:33873"
+rpc_user = "YOUR_RPC_USER"
+rpc_password = "YOUR_RPC_PASSWORD"
+is_parent = false
+block_reward = 10000.0
+confirmation_depth = 240
+
+[[coins]]
+name = "bells"
+reward_address = "YOUR_BELLS_ADDRESS"
+symbol = "BELLS"
+rpc_url = "http://host.docker.internal:19918"
+rpc_user = "YOUR_RPC_USER"
+rpc_password = "YOUR_RPC_PASSWORD"
+is_parent = false
+block_reward = 2.0
+confirmation_depth = 240
+
+[[coins]]
+name = "luckycoin"
+reward_address = "YOUR_LKY_ADDRESS"
+symbol = "LKY"
+rpc_url = "http://host.docker.internal:9918"
+rpc_user = "YOUR_RPC_USER"
+rpc_password = "YOUR_RPC_PASSWORD"
+is_parent = false
+block_reward = 1.375
+confirmation_depth = 70
+
+[[coins]]
+name = "junkcoin"
+reward_address = "YOUR_JKC_ADDRESS"
+symbol = "JKC"
+rpc_url = "http://host.docker.internal:9772"
+rpc_user = "YOUR_RPC_USER"
+rpc_password = "YOUR_RPC_PASSWORD"
+is_parent = false
+block_reward = 50.0
+confirmation_depth = 70
+
+[[coins]]
+name = "dingocoin"
+reward_address = "YOUR_DINGO_ADDRESS"
+symbol = "DINGO"
+rpc_url = "http://host.docker.internal:34646"
+rpc_user = "YOUR_RPC_USER"
+rpc_password = "YOUR_RPC_PASSWORD"
+is_parent = false
+block_reward = 10000.0
+confirmation_depth = 240
+
+[[coins]]
+name = "shibacoin"
+reward_address = "YOUR_SHIC_ADDRESS"
+symbol = "SHIC"
+rpc_url = "http://host.docker.internal:33863"
+rpc_user = "YOUR_RPC_USER"
+rpc_password = "YOUR_RPC_PASSWORD"
+is_parent = false
+block_reward = 10700.0
+confirmation_depth = 240
+
+[[coins]]
+name = "trumpow"
+reward_address = "YOUR_TRMP_ADDRESS"
+symbol = "TRMP"
+rpc_url = "http://host.docker.internal:33883"
+rpc_user = "YOUR_RPC_USER"
+rpc_password = "YOUR_RPC_PASSWORD"
+is_parent = false
+block_reward = 125000.0
+confirmation_depth = 240

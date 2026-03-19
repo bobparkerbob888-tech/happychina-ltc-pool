@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HappyChina Pool - Scrypt Mining Pool</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <div class="logo-icon">HC</div>
+            HappyChina Pool
+        </a>
+        <div class="navbar-links">
+            <a href="/" class="active">Dashboard</a>
+            <a href="blocks.html">Blocks</a>
+            <a href="miner.html">Miner</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Odds / TTF Stats Bar -->
+        <div class="odds-bar">
+            <div class="odds-item">
+                <div class="odds-label">Pool Hashrate</div>
+                <div class="odds-value accent" id="odds-hashrate">--</div>
+            </div>
+            <div class="odds-divider"></div>
+            <div class="odds-item">
+                <div class="odds-label">Odds / Block</div>
+                <div class="odds-value" id="odds-per-block">--</div>
+            </div>
+            <div class="odds-divider"></div>
+            <div class="odds-item">
+                <div class="odds-label">Odds / Day</div>
+                <div class="odds-value" id="odds-per-day">--</div>
+            </div>
+            <div class="odds-divider"></div>
+            <div class="odds-item">
+                <div class="odds-label">Odds / Week</div>
+                <div class="odds-value" id="odds-per-week">--</div>
+            </div>
+            <div class="odds-divider"></div>
+            <div class="odds-item">
+                <div class="odds-label">Odds / Year</div>
+                <div class="odds-value" id="odds-per-year">--</div>
+            </div>
+            <div class="odds-divider"></div>
+            <div class="odds-item">
+                <div class="odds-label">Est. TTF</div>
+                <div class="odds-value" id="odds-ttf">--</div>
+            </div>
+            <div class="odds-divider"></div>
+            <div class="odds-item">
+                <div class="odds-label">Best Share</div>
+                <div class="odds-value" id="odds-best-share">--</div>
+            </div>
+            <div class="odds-divider"></div>
+            <div class="odds-item">
+                <div class="odds-label">Net Difficulty</div>
+                <div class="odds-value" id="odds-net-diff">--</div>
+            </div>
+        </div>
+
+        <!-- Hero Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Pool Hashrate</div>
+                <div class="value accent" id="stat-hashrate">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Active Miners</div>
+                <div class="value" id="stat-miners">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Workers Online</div>
+                <div class="value" id="stat-workers">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Network Difficulty</div>
+                <div class="value" id="stat-netdiff">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Est. Time to Find</div>
+                <div class="value" id="stat-ttf">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Blocks Found</div>
+                <div class="value" id="stat-blocks">--</div>
+            </div>
+        </div>
+
+        <!-- Second row stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Total Shares</div>
+                <div class="value" id="stat-shares">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Shares / sec</div>
+                <div class="value" id="stat-sps">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Pool Fee</div>
+                <div class="value" id="stat-fee">--</div>
+            </div>
+        </div>
+
+        <!-- Merge-Mined Coins -->
+        <div class="section">
+            <div class="section-title">Merge-Mined Coins</div>
+            <div class="coins-grid" id="coins-grid">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </div>
+
+        <!-- Recent Blocks -->
+        <div class="section">
+            <div class="section-title">Recent Blocks</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Coin</th>
+                            <th>Height</th>
+                            <th>Hash</th>
+                            <th>Reward</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-blocks-body">
+                        <tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Connection Info -->
+        <div class="section">
+            <div class="section-title">Connection Info</div>
+            <div class="connect-info">
+                <div class="connect-box">
+                    <div class="connect-label">Stratum URL (ASIC Fixed 1M)</div>
+                    <div class="connect-value">stratum+tcp://YOUR_SERVER_IP:3332</div>
+                </div>
+                <div class="connect-box">
+                    <div class="connect-label">Stratum URL (Vardiff)</div>
+                    <div class="connect-value">stratum+tcp://YOUR_SERVER_IP:3333</div>
+                </div>
+                <div class="connect-box">
+                    <div class="connect-label">Stratum URL (Mega 2B)</div>
+                    <div class="connect-value">stratum+tcp://YOUR_SERVER_IP:3334</div>
+                </div>
+                <div class="connect-box">
+                    <div class="connect-label">Worker Format</div>
+                    <div class="connect-value">YOUR_LTC_ADDRESS.worker_name</div>
+                </div>
+                <div class="connect-box">
+                    <div class="connect-label">Algorithm</div>
+                    <div class="connect-value">Scrypt (N=1024, r=1, p=1)</div>
+                </div>
+                <div class="connect-box">
+                    <div class="connect-label">Payout</div>
+                    <div class="connect-value">PPLNS - Automatic withdrawal on request</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Miner Lookup -->
+        <div class="section">
+            <div class="section-title">Miner Lookup</div>
+            <div class="input-group" style="max-width:600px">
+                <input type="text" id="miner-lookup-input" placeholder="Enter your LTC address..." onkeypress="handleMinerKeypress(event)">
+                <button class="btn btn-primary" onclick="goToMiner()">Search</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        HappyChina Pool &mdash; Scrypt Merge-Mining (LTC + 8 Aux Coins) &mdash; 1% Fee &mdash; PPLNS
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>startAutoRefresh(loadDashboard, 15000);</script>
+</body>
+</html>

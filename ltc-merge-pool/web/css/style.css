@@ -1,0 +1,675 @@
+/* HappyChina Pool - Dark theme inspired by ViaBTC */
+/* Color scheme: bg #0a0e17, cards #111827, accent #00e5ff, text #e0e0e0 */
+
+:root {
+    --bg-primary: #0a0e17;
+    --bg-card: #111827;
+    --bg-card-hover: #1a2332;
+    --bg-input: #0d1321;
+    --accent: #00e5ff;
+    --accent-dim: rgba(0, 229, 255, 0.15);
+    --accent-glow: rgba(0, 229, 255, 0.3);
+    --text-primary: #e0e0e0;
+    --text-secondary: #8899aa;
+    --text-muted: #556677;
+    --border: #1e293b;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --purple: #a78bfa;
+    --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Cascadia Code", monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+a:hover {
+    opacity: 0.8;
+}
+
+/* ── Header / Navbar ─────────────────────────────── */
+.navbar {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.navbar-brand .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--accent), #0088cc);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #000;
+    font-weight: 900;
+}
+
+.navbar-links {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.navbar-links a {
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.navbar-links a:hover,
+.navbar-links a.active {
+    color: var(--accent);
+    background: var(--accent-dim);
+}
+
+/* ── Layout ──────────────────────────────────────── */
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+/* ── Stat Cards Grid ─────────────────────────────── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    transition: border-color 0.2s, transform 0.15s;
+}
+.stat-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+.stat-card .label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.35rem;
+}
+.stat-card .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+.stat-card .value.accent {
+    color: var(--accent);
+}
+.stat-card .sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* ── Section Cards ───────────────────────────────── */
+.section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ── Coin Cards ──────────────────────────────────── */
+.coins-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+.coin-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    transition: border-color 0.2s;
+}
+.coin-card:hover {
+    border-color: var(--accent);
+}
+.coin-card .coin-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+.coin-card .coin-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #000;
+    flex-shrink: 0;
+}
+.coin-card .coin-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+.coin-card .coin-symbol {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.coin-card .coin-detail {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    padding: 0.2rem 0;
+}
+.coin-card .coin-detail .detail-label {
+    color: var(--text-secondary);
+}
+.coin-card .coin-detail .detail-value {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+}
+.coin-badge {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.coin-badge.parent {
+    background: var(--accent-dim);
+    color: var(--accent);
+}
+.coin-badge.aux {
+    background: rgba(167, 139, 250, 0.15);
+    color: var(--purple);
+}
+
+/* Coin-specific colors */
+.coin-ltc { background: #345d9d; }
+.coin-doge { background: #c2a633; }
+.coin-pepe { background: #3e8948; }
+.coin-bells { background: #c0872e; }
+.coin-lky { background: #4e9a06; }
+.coin-jkc { background: #6b4ce0; }
+.coin-dingo { background: #e07b4c; }
+.coin-shic { background: #e04c4c; }
+.coin-trmp { background: #cc3333; }
+
+/* ── Tables ──────────────────────────────────────── */
+.table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+thead th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--border);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+tbody td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+tbody tr:hover {
+    background: var(--bg-card-hover);
+}
+tbody tr:last-child td {
+    border-bottom: none;
+}
+.hash-cell {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mono {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+}
+
+/* ── Status Badges ───────────────────────────────── */
+.badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.badge-pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+}
+.badge-confirmed {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+.badge-orphaned {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+}
+.badge-online {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+.badge-offline {
+    background: rgba(85, 102, 119, 0.15);
+    color: var(--text-muted);
+}
+
+/* ── Buttons ─────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+.btn-primary {
+    background: var(--accent);
+    color: #000;
+}
+.btn-primary:hover {
+    background: #33ecff;
+    transform: translateY(-1px);
+}
+.btn-outline {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+.btn-outline:hover {
+    background: var(--accent-dim);
+}
+.btn-sm {
+    padding: 0.3rem 0.75rem;
+    font-size: 0.78rem;
+}
+.btn-danger {
+    background: var(--danger);
+    color: #fff;
+}
+.btn-danger:hover {
+    background: #f87171;
+}
+
+/* ── Inputs ──────────────────────────────────────── */
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+input[type="text"],
+input[type="number"],
+select {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+}
+input:focus,
+select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* ── Filter Tabs ─────────────────────────────────── */
+.filter-tabs {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+.filter-tab {
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+}
+.filter-tab:hover,
+.filter-tab.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-dim);
+}
+
+/* ── Connection Info ─────────────────────────────── */
+.connect-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+.connect-box {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+}
+.connect-box .connect-label {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+}
+.connect-box .connect-value {
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    color: var(--accent);
+    word-break: break-all;
+}
+
+/* ── Modal ───────────────────────────────────────── */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.active {
+    display: flex;
+}
+.modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 440px;
+    margin: 1rem;
+}
+.modal-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+}
+.modal-field {
+    margin-bottom: 1rem;
+}
+.modal-field label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+.modal-balance {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+.modal-balance span {
+    color: var(--accent);
+    font-family: var(--font-mono);
+}
+
+/* ── Assets Table (ViaBTC style) ─────────────────── */
+.assets-table {
+    width: 100%;
+}
+.assets-table td {
+    vertical-align: middle;
+}
+.asset-coin-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.asset-coin-cell .coin-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #000;
+    flex-shrink: 0;
+}
+
+/* ── Alert / Toast ───────────────────────────────── */
+.toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    font-size: 0.88rem;
+    z-index: 300;
+    display: none;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+.toast.success { border-color: var(--success); }
+.toast.error { border-color: var(--danger); }
+.toast.show { display: block; animation: slideIn 0.3s ease; }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* ── Footer ──────────────────────────────────────── */
+.footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+}
+
+/* ── Loading ─────────────────────────────────────── */
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+.spinner {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 1rem;
+    }
+    .navbar-links {
+        gap: 0;
+    }
+    .navbar-links a {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.82rem;
+    }
+    .container {
+        padding: 1rem;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .stat-card .value {
+        font-size: 1.1rem;
+    }
+    .coins-grid {
+        grid-template-columns: 1fr;
+    }
+    .connect-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Odds / TTF Stats Bar ────────────────────────── */
+.odds-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+    background: linear-gradient(135deg, #0d1a2d 0%, #111827 50%, #0d1a2d 100%);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.08), inset 0 0 30px rgba(0, 229, 255, 0.03);
+}
+.odds-item {
+    text-align: center;
+    padding: 0.25rem 0.75rem;
+    min-width: 100px;
+}
+.odds-label {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 0.15rem;
+    white-space: nowrap;
+}
+.odds-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+}
+.odds-value.accent {
+    color: var(--accent);
+}
+.odds-divider {
+    width: 1px;
+    height: 32px;
+    background: var(--border);
+    flex-shrink: 0;
+}
+@media (max-width: 768px) {
+    .odds-bar {
+        gap: 0.25rem;
+        padding: 0.5rem;
+    }
+    .odds-item {
+        padding: 0.25rem 0.4rem;
+        min-width: 80px;
+    }
+    .odds-value {
+        font-size: 0.8rem;
+    }
+    .odds-divider {
+        display: none;
+    }
+}

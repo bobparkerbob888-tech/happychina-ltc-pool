@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocks - HappyChina Pool</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <div class="logo-icon">HC</div>
+            HappyChina Pool
+        </a>
+        <div class="navbar-links">
+            <a href="/">Dashboard</a>
+            <a href="blocks.html" class="active">Blocks</a>
+            <a href="miner.html">Miner</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-title">Blocks <span id="blocks-total" style="font-size:0.85rem;color:var(--text-secondary);font-weight:400;margin-left:0.5rem"></span></div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-coin="ALL" onclick="filterBlocks('ALL')">All Coins</button>
+            <button class="filter-tab" data-coin="LTC" onclick="filterBlocks('LTC')">LTC</button>
+            <button class="filter-tab" data-coin="DOGE" onclick="filterBlocks('DOGE')">DOGE</button>
+            <button class="filter-tab" data-coin="PEPE" onclick="filterBlocks('PEPE')">PEPE</button>
+            <button class="filter-tab" data-coin="BELLS" onclick="filterBlocks('BELLS')">BELLS</button>
+            <button class="filter-tab" data-coin="LKY" onclick="filterBlocks('LKY')">LKY</button>
+            <button class="filter-tab" data-coin="JKC" onclick="filterBlocks('JKC')">JKC</button>
+            <button class="filter-tab" data-coin="DINGO" onclick="filterBlocks('DINGO')">DINGO</button>
+            <button class="filter-tab" data-coin="SHIC" onclick="filterBlocks('SHIC')">SHIC</button>
+            <button class="filter-tab" data-coin="TRMP" onclick="filterBlocks('TRMP')">TRMP</button>
+        </div>
+
+        <div class="section">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Coin</th>
+                            <th>Height</th>
+                            <th>Hash</th>
+                            <th>Miner</th>
+                            <th>Reward</th>
+                            <th>Confirms</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="blocks-body">
+                        <tr><td colspan="8" class="loading"><div class="spinner"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        HappyChina Pool &mdash; Scrypt Merge-Mining
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>startAutoRefresh(loadBlocksPage, 15000);</script>
+</body>
+</html>

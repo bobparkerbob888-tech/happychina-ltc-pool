@@ -1,0 +1,43 @@
+manifestVersion: 1
+id: ltc-merge-pool
+name: HappyChina LTC Merge Mining Pool
+tagline: Solo mine Litecoin + 8 merge-mined scrypt coins
+icon: https://raw.githubusercontent.com/bobparkerbob888-tech/happychina-ltc-pool/main/ltc-merge-pool/icon.png
+category: finance
+version: "1.0.0"
+port: 3080
+description: >-
+  A high-performance Litecoin merge mining pool written in Rust. Mines Litecoin (LTC) as the
+  parent chain using scrypt proof-of-work, and simultaneously merge-mines 8 auxiliary chains:
+  Dogecoin (DOGE), Pepecoin (PEPE), Bellscoin (BELLS), Luckycoin (LKY), Junkcoin (JKC),
+  Dingocoin (DINGO), Shibacoin (SHIC), and TrumpPoW (TRMP).
+
+
+  Features include PPLNS payout scheme, automatic withdrawal processing, variable difficulty
+  (vardiff) support for ASICs, real-time web dashboard with block tracking, merge-mined coin
+  stats, miner/worker monitoring, and a PostgreSQL-backed database for reliability.
+
+
+  The pool binary is compiled from Rust source code during installation. Stratum ports are
+  exposed for connecting ASIC miners. The web frontend provides a real-time overview of pool
+  hashrate, found blocks across all 9 coins, miner statistics, and withdrawal management.
+
+
+  Requirements: All 9 coin daemons (litecoind, dogecoind, pepecoind, bellsd, luckycoind,
+  junkcoind, dingocoind, shibacoind, trumpowd) must be running and accessible via RPC.
+  Configure their RPC URLs in the config.toml file before starting the pool.
+developer: HappyChina
+website: https://github.com/bobparkerbob888-tech/happychina-ltc-pool
+repo: https://github.com/bobparkerbob888-tech/happychina-ltc-pool
+support: https://github.com/bobparkerbob888-tech/happychina-ltc-pool/issues
+gallery:
+  - https://raw.githubusercontent.com/bobparkerbob888-tech/happychina-ltc-pool/main/ltc-merge-pool/icon.png
+releaseNotes: >-
+  Initial release. Litecoin parent chain with 8 merge-mined auxiliary coins.
+  PPLNS payouts, vardiff, real-time web dashboard.
+dependencies: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+submitter: HappyChina
+submission: https://github.com/bobparkerbob888-tech/happychina-ltc-pool

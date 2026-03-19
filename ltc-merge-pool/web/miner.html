@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miner Stats - HappyChina Pool</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <div class="logo-icon">HC</div>
+            HappyChina Pool
+        </a>
+        <div class="navbar-links">
+            <a href="/">Dashboard</a>
+            <a href="blocks.html">Blocks</a>
+            <a href="miner.html" class="active">Miner</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Miner Lookup -->
+        <div class="section" style="margin-bottom:1.5rem">
+            <div class="input-group" style="max-width:700px">
+                <input type="text" id="miner-lookup-input" placeholder="Enter your LTC address..." onkeypress="handleMinerKeypress(event)">
+                <button class="btn btn-primary" onclick="goToMiner()">Search</button>
+            </div>
+        </div>
+
+        <div id="miner-content">
+            <div class="page-title">
+                Miner: <span id="miner-addr-display" class="mono" style="font-size:0.9rem;word-break:break-all"></span>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">Hashrate</div>
+                    <div class="value accent" id="miner-hashrate">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Workers (online/total)</div>
+                    <div class="value" id="miner-workers-count">--</div>
+                </div>
+            </div>
+
+            <!-- Workers Table -->
+            <div class="section">
+                <div class="section-title">Workers</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Hashrate</th>
+                                <th>Difficulty</th>
+                                <th>Last Seen</th>
+                                <th>Status</th>
+                                <th>User Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workers-body">
+                            <tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Link to Assets -->
+            <div class="section" style="text-align:center;padding:2rem">
+                <a id="assets-link" href="assets.html" class="btn btn-primary" style="font-size:1rem;padding:0.75rem 2rem">
+                    View Balances &amp; Withdraw
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        HappyChina Pool &mdash; Scrypt Merge-Mining
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>startAutoRefresh(loadMinerPage, 15000);</script>
+</body>
+</html>
