@@ -126,3 +126,26 @@ The dashboard shows:
 ## License
 
 All rights reserved.
+
+## Admin Panel
+
+Access the admin dashboard at `http://YOUR_SERVER_IP/admin.html`
+
+**Default password:** `happychina`
+
+**Change your password immediately after first login!**
+
+### Admin Features:
+- Pool overview (hashrate, miners, blocks, earnings)
+- Fee settings (change pool fee %)
+- Pool fee address management
+- Per-coin reward address management
+- Miner list with hashrates and balances
+- Block history with status
+- Earnings and withdrawal tracking
+- Password management
+
+### Security:
+- All admin endpoints require authentication via `X-Admin-Key` header
+- Password is stored in `config.toml` as `admin_key`
+- Change the default password on first login

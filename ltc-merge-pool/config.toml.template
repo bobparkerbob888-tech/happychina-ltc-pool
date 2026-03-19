@@ -1,18 +1,10 @@
-# ============================================================
-# HappyChina Pool - Configuration Template
-# ============================================================
-# Copy this file to config.toml and edit the values below.
-# All RPC URLs should point to your running coin daemons.
-# Replace YOUR_*_ADDRESS with your actual wallet addresses.
-# ============================================================
-
 [pool]
 name = "HappyChina Pool"
 fee_percent = 1.0
 pplns_window = 100000
 block_confirmation_depth = 100
 pool_address = "YOUR_LTC_ADDRESS"
-api_port = 8090
+admin_key = "happychina"
 
 [stratum]
 ports = [
@@ -30,107 +22,112 @@ connection_timeout_secs = 300
 max_connections = 10000
 
 [database]
-url = "postgres://pool:pool@postgres:5432/happychain"
-
-# ── Parent Chain ────────────────────────────────────────────
+url = "postgres://pool:pool@127.0.0.1/happychain"
 
 [[coins]]
 name = "litecoin"
-reward_address = "YOUR_LTC_ADDRESS"
+reward_address = "YOUR_COIN_ADDRESS"
 symbol = "LTC"
-rpc_url = "http://host.docker.internal:9332"
+rpc_url = "http://127.0.0.1:9332"
 rpc_user = "YOUR_RPC_USER"
 rpc_password = "YOUR_RPC_PASSWORD"
 is_parent = true
 block_reward = 6.25
 confirmation_depth = 100
-
-# ── Auxiliary (Merge-Mined) Chains ──────────────────────────
+zmq_hashblock = "tcp://127.0.0.1:28332"
 
 [[coins]]
 name = "dogecoin"
-reward_address = "YOUR_DOGE_ADDRESS"
+reward_address = "YOUR_COIN_ADDRESS"
 symbol = "DOGE"
-rpc_url = "http://host.docker.internal:22555"
+rpc_url = "http://127.0.0.1:22555"
 rpc_user = "YOUR_RPC_USER"
 rpc_password = "YOUR_RPC_PASSWORD"
 is_parent = false
 block_reward = 10000.0
 confirmation_depth = 240
+zmq_hashblock = "tcp://127.0.0.1:28335"
 
 [[coins]]
 name = "pepecoin"
-reward_address = "YOUR_PEPE_ADDRESS"
+reward_address = "YOUR_COIN_ADDRESS"
 symbol = "PEPE"
-rpc_url = "http://host.docker.internal:33873"
+rpc_url = "http://127.0.0.1:33873"
 rpc_user = "YOUR_RPC_USER"
 rpc_password = "YOUR_RPC_PASSWORD"
 is_parent = false
 block_reward = 10000.0
 confirmation_depth = 240
+zmq_hashblock = "tcp://127.0.0.1:28339"
 
 [[coins]]
 name = "bells"
-reward_address = "YOUR_BELLS_ADDRESS"
+reward_address = "YOUR_COIN_ADDRESS"
 symbol = "BELLS"
-rpc_url = "http://host.docker.internal:19918"
+rpc_url = "http://127.0.0.1:19918"
 rpc_user = "YOUR_RPC_USER"
 rpc_password = "YOUR_RPC_PASSWORD"
 is_parent = false
 block_reward = 2.0
 confirmation_depth = 240
+zmq_hashblock = "tcp://127.0.0.1:28336"
 
 [[coins]]
 name = "luckycoin"
-reward_address = "YOUR_LKY_ADDRESS"
+reward_address = "YOUR_COIN_ADDRESS"
 symbol = "LKY"
-rpc_url = "http://host.docker.internal:9918"
+rpc_url = "http://127.0.0.1:9918"
 rpc_user = "YOUR_RPC_USER"
 rpc_password = "YOUR_RPC_PASSWORD"
 is_parent = false
 block_reward = 1.375
 confirmation_depth = 70
+zmq_hashblock = "tcp://127.0.0.1:28337"
 
 [[coins]]
 name = "junkcoin"
-reward_address = "YOUR_JKC_ADDRESS"
+reward_address = "YOUR_COIN_ADDRESS"
 symbol = "JKC"
-rpc_url = "http://host.docker.internal:9772"
+rpc_url = "http://127.0.0.1:9772"
 rpc_user = "YOUR_RPC_USER"
 rpc_password = "YOUR_RPC_PASSWORD"
 is_parent = false
 block_reward = 50.0
 confirmation_depth = 70
+zmq_hashblock = "tcp://127.0.0.1:28338"
 
 [[coins]]
 name = "dingocoin"
-reward_address = "YOUR_DINGO_ADDRESS"
+reward_address = "YOUR_COIN_ADDRESS"
 symbol = "DINGO"
-rpc_url = "http://host.docker.internal:34646"
+rpc_url = "http://127.0.0.1:34646"
 rpc_user = "YOUR_RPC_USER"
 rpc_password = "YOUR_RPC_PASSWORD"
 is_parent = false
 block_reward = 10000.0
 confirmation_depth = 240
+zmq_hashblock = "tcp://127.0.0.1:28340"
 
 [[coins]]
 name = "shibacoin"
-reward_address = "YOUR_SHIC_ADDRESS"
+reward_address = "YOUR_COIN_ADDRESS"
 symbol = "SHIC"
-rpc_url = "http://host.docker.internal:33863"
+rpc_url = "http://127.0.0.1:33863"
 rpc_user = "YOUR_RPC_USER"
 rpc_password = "YOUR_RPC_PASSWORD"
 is_parent = false
 block_reward = 10700.0
 confirmation_depth = 240
+zmq_hashblock = "tcp://127.0.0.1:28341"
 
 [[coins]]
 name = "trumpow"
-reward_address = "YOUR_TRMP_ADDRESS"
+reward_address = "YOUR_COIN_ADDRESS"
 symbol = "TRMP"
-rpc_url = "http://host.docker.internal:33883"
+rpc_url = "http://127.0.0.1:33883"
 rpc_user = "YOUR_RPC_USER"
 rpc_password = "YOUR_RPC_PASSWORD"
 is_parent = false
 block_reward = 125000.0
 confirmation_depth = 240
+zmq_hashblock = "tcp://127.0.0.1:28342"

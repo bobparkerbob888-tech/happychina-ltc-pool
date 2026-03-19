@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HappyChina Pool - Admin</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Admin-specific styles */
+        .admin-login {
+            max-width: 400px;
+            margin: 100px auto;
+            text-align: center;
+        }
+        .admin-login h2 {
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+        .admin-login input[type="password"] {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            width: 100%;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+        .admin-login input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .admin-content { display: none; }
+        .admin-content.visible { display: block; }
+        .admin-login.hidden { display: none; }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .admin-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .admin-header .admin-controls {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .refresh-info {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* Tabs */
+        .admin-tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0;
+        }
+        .admin-tab {
+            padding: 0.6rem 1.25rem;
+            border-radius: 6px 6px 0 0;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            border-bottom: none;
+            transition: all 0.2s;
+            position: relative;
+            bottom: -2px;
+        }
+        .admin-tab:hover {
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+        .admin-tab.active {
+            color: var(--accent);
+            background: var(--bg-card);
+            border-color: var(--border);
+            border-bottom: 2px solid var(--bg-card);
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Fee editor */
+        .fee-editor {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        .fee-editor input {
+            width: 120px;
+        }
+        .fee-result {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            min-height: 1.5em;
+        }
+        .fee-result.success { color: var(--success); }
+        .fee-result.error { color: var(--danger); }
+
+        /* Danger zone */
+        .danger-zone {
+            border: 1px solid var(--danger);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            background: rgba(239, 68, 68, 0.05);
+        }
+        .danger-zone h3 {
+            color: var(--danger);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        .danger-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(239, 68, 68, 0.15);
+        }
+        .danger-item:last-child { border-bottom: none; }
+        .danger-item .danger-info h4 {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        .danger-item .danger-info p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .btn-danger-outline {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 0.35rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* Summary cards row */
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Table scrollable */
+        .admin-table-wrap {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        .admin-table-wrap table thead {
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+            z-index: 2;
+        }
+
+        /* Coin tag */
+        .coin-tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #000;
+        }
+
+        /* Config grid */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .config-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .config-item .config-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+        .config-item .config-value {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        /* Address management styles */
+        .address-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .address-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+        .address-section .section-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+        .address-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .address-row:last-child {
+            border-bottom: none;
+        }
+        .address-row .addr-label {
+            min-width: 70px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+        .address-row .addr-value {
+            flex: 1;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            color: var(--accent);
+            word-break: break-all;
+        }
+        .address-row .addr-type {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            min-width: 50px;
+        }
+        .address-row .btn-edit-addr {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .address-row .btn-edit-addr:hover {
+            background: var(--accent);
+            color: #000;
+        }
+        .address-edit-form {
+            display: none;
+            flex: 1;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .address-edit-form.active {
+            display: flex;
+        }
+        .address-edit-form input {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 0.6rem;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            outline: none;
+        }
+        .address-edit-form input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+        .address-edit-form .btn-save-addr {
+            background: var(--success);
+            color: #fff;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .address-edit-form .btn-cancel-addr {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .address-result {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            min-height: 1.2em;
+        }
+        .address-result.success { color: var(--success); }
+        .address-result.error { color: var(--danger); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <div class="logo-icon">HC</div>
+            HappyChina Pool
+        </a>
+        <div class="navbar-links">
+            <a href="/">Dashboard</a>
+            <a href="blocks.html">Blocks</a>
+            <a href="miner.html">Miner</a>
+            <a href="admin.html" class="active">Admin</a>
+        </div>
+    </nav>
+
+    <!-- Login -->
+    <div class="container" id="login-container">
+        <div class="admin-login" id="admin-login">
+            <h2>Pool Admin</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Enter the admin key to access the dashboard.</p>
+            <input type="password" id="admin-key-input" placeholder="Admin Key" autofocus>
+            <br>
+            <button class="btn btn-primary" onclick="tryLogin()" style="width:100%">Login</button>
+            <p id="login-error" style="color: var(--danger); margin-top: 1rem; font-size: 0.85rem;"></p>
+        </div>
+    </div>
+
+    <!-- Admin Content -->
+    <div class="container admin-content" id="admin-content">
+        <div class="admin-header">
+            <h1>Pool Administration</h1>
+            <div class="admin-controls">
+                <span class="refresh-info" id="last-refresh">Last refresh: --</span>
+                <button class="btn btn-outline btn-sm" onclick="refreshAll()">Refresh Now</button>
+                <button class="btn btn-sm" style="background:var(--danger);color:#fff" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+            <div class="admin-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</div>
+            <div class="admin-tab" data-tab="miners" onclick="switchTab('miners')">Miners</div>
+            <div class="admin-tab" data-tab="blocks" onclick="switchTab('blocks')">Blocks</div>
+            <div class="admin-tab" data-tab="earnings" onclick="switchTab('earnings')">Earnings</div>
+            <div class="admin-tab" data-tab="withdrawals" onclick="switchTab('withdrawals')">Withdrawals</div>
+            <div class="admin-tab" data-tab="config" onclick="switchTab('config')">Config</div>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="tab-panel active" id="tab-overview">
+            <div class="summary-row" id="summary-cards">
+                <div class="stat-card"><div class="label">Pool Hashrate</div><div class="value accent" id="s-hashrate">--</div></div>
+                <div class="stat-card"><div class="label">Active Miners</div><div class="value" id="s-miners">--</div></div>
+                <div class="stat-card"><div class="label">Workers Online</div><div class="value" id="s-workers">--</div></div>
+                <div class="stat-card"><div class="label">Shares/sec</div><div class="value" id="s-sps">--</div></div>
+                <div class="stat-card"><div class="label">Total Shares</div><div class="value" id="s-total-shares">--</div></div>
+                <div class="stat-card"><div class="label">DB Size</div><div class="value" id="s-dbsize">--</div></div>
+            </div>
+
+            <div class="summary-row">
+                <div class="stat-card"><div class="label">Blocks Found</div><div class="value accent" id="s-blocks-found">--</div></div>
+                <div class="stat-card"><div class="label">Confirmed</div><div class="value" style="color:var(--success)" id="s-blocks-confirmed">--</div></div>
+                <div class="stat-card"><div class="label">Pending</div><div class="value" style="color:var(--warning)" id="s-blocks-pending">--</div></div>
+                <div class="stat-card"><div class="label">Orphaned</div><div class="value" style="color:var(--danger)" id="s-blocks-orphaned">--</div></div>
+                <div class="stat-card"><div class="label">Pool Fee</div><div class="value" id="s-fee">--</div></div>
+                <div class="stat-card"><div class="label">Pending Payouts</div><div class="value" id="s-pending-wd">--</div></div>
+            </div>
+
+            <!-- Per-coin breakdown -->
+            <div class="section">
+                <div class="section-title">Per-Coin Breakdown</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Coin</th>
+                                <th>Type</th>
+                                <th>Height</th>
+                                <th>Network Diff</th>
+                                <th>Block Reward</th>
+                                <th>Blocks Found</th>
+                                <th>Total Balances</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coin-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Fee Editor -->
+            <div class="section">
+                <div class="section-title">Pool Fee Settings</div>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:0.5rem;">Current fee: <span id="current-fee" class="mono" style="color:var(--accent)">--</span>%</p>
+                <div class="fee-editor">
+                    <input type="number" id="new-fee" step="0.1" min="0" max="100" placeholder="New fee %">
+                    <button class="btn btn-primary btn-sm" onclick="updateFee()">Update Fee</button>
+                </div>
+                <div class="fee-result" id="fee-result"></div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="danger-zone">
+                <h3>Danger Zone</h3>
+                <div class="danger-item">
+                    <div class="danger-info">
+                        <h4>Clear Share History</h4>
+                        <p>Delete all shares older than 7 days. Not reversible.</p>
+                    </div>
+                    <button class="btn-danger-outline" disabled title="Not yet implemented">Clear Shares</button>
+                </div>
+                <div class="danger-item">
+                    <div class="danger-info">
+                        <h4>Restart Pool Service</h4>
+                        <p>Restart the happychain-pool systemd service. Causes brief downtime.</p>
+                    </div>
+                    <button class="btn-danger-outline" disabled title="Not yet implemented">Restart</button>
+                </div>
+                <div class="danger-item">
+                    <div class="danger-info">
+                        <h4>Force Reprocess Pending Blocks</h4>
+                        <p>Re-check all pending blocks against the chain.</p>
+                    </div>
+                    <button class="btn-danger-outline" disabled title="Not yet implemented">Reprocess</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Miners Tab -->
+        <div class="tab-panel" id="tab-miners">
+            <div class="section">
+                <div class="section-title">All Miners (<span id="miner-count">0</span>)</div>
+                <div class="admin-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Address</th>
+                                <th>Hashrate</th>
+                                <th>Workers</th>
+                                <th>Shares (10m)</th>
+                                <th>Balances</th>
+                                <th>Last Seen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="miners-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blocks Tab -->
+        <div class="tab-panel" id="tab-blocks">
+            <div class="section">
+                <div class="section-title">All Blocks (<span id="block-count">0</span>)</div>
+                <div class="filter-tabs" id="block-filters"></div>
+                <div class="admin-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Coin</th>
+                                <th>Height</th>
+                                <th>Status</th>
+                                <th>Reward</th>
+                                <th>Miner</th>
+                                <th>Confirmations</th>
+                                <th>Block Hash</th>
+                                <th>Found</th>
+                            </tr>
+                        </thead>
+                        <tbody id="blocks-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earnings Tab -->
+        <div class="tab-panel" id="tab-earnings">
+            <div class="section">
+                <div class="section-title">Recent Earnings (<span id="earning-count">0</span>)</div>
+                <div class="admin-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Miner</th>
+                                <th>Coin</th>
+                                <th>Block ID</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earnings-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawals Tab -->
+        <div class="tab-panel" id="tab-withdrawals">
+            <div class="section">
+                <div class="section-title">All Withdrawals (<span id="withdrawal-count">0</span> total, <span id="withdrawal-pending">0</span> pending)</div>
+                <div class="admin-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Miner</th>
+                                <th>Coin</th>
+                                <th>Amount</th>
+                                <th>Fee</th>
+                                <th>Status</th>
+                                <th>TX Hash</th>
+                                <th>Error</th>
+                                <th>Requested</th>
+                                <th>Completed</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawals-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Config Tab -->
+        <div class="tab-panel" id="tab-config">
+            <div class="section">
+                <div class="section-title">Pool Configuration</div>
+                <div class="config-grid" id="config-grid"></div>
+            </div>
+
+            <!-- Pool Fee Address -->
+            <div class="address-section" id="pool-address-section">
+                <h3>Pool Fee Address (LTC)</h3>
+                <div class="section-hint">Receives 1% of every LTC block found. This is the coinbase fee output in the parent chain (LTC).</div>
+                <div class="address-row" id="pool-address-row">
+                    <div class="addr-label">LTC Fee</div>
+                    <div class="addr-value" id="pool-address-display">--</div>
+                    <button class="btn-edit-addr" onclick="editPoolAddress()">Edit</button>
+                </div>
+                <div class="address-edit-form" id="pool-address-edit">
+                    <input type="text" id="pool-address-input" placeholder="New LTC pool fee address...">
+                    <button class="btn-save-addr" onclick="savePoolAddress()">Save</button>
+                    <button class="btn-cancel-addr" onclick="cancelPoolAddressEdit()">Cancel</button>
+                </div>
+                <div class="address-result" id="pool-address-result"></div>
+            </div>
+
+            <!-- Coin Reward Addresses -->
+            <div class="address-section" id="reward-addresses-section">
+                <h3>Coin Reward Addresses</h3>
+                <div class="section-hint">Reward addresses are where aux chain block rewards are collected before PPLNS distribution. The entire block reward goes to this address, then the pool distributes earnings minus the fee% to miners.</div>
+                <div id="reward-addresses-list">
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Loading...</p>
+                </div>
+                <div class="address-result" id="reward-address-result"></div>
+            </div>
+
+            <div class="section" style="margin-top:1.5rem">
+                <div class="section-title">Stratum Ports</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Port</th><th>Name</th><th>Difficulty</th><th>Vardiff</th></tr>
+                        </thead>
+                        <tbody id="stratum-ports-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section" style="margin-top:1.5rem">
+                <div class="section-title">Coin Configuration</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Coin</th><th>Symbol</th><th>Type</th><th>Block Reward</th><th>Confirm Depth</th><th>RPC URL</th><th>Reward Address</th></tr>
+                        </thead>
+                        <tbody id="coin-config-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">HappyChina Pool Admin &copy; 2026</div>
+
+    <script>
+    // ── Globals ─────────────────────────────────────
+    let ADMIN_KEY = localStorage.getItem('hc_admin_key') || '';
+    let refreshTimer = null;
+    let allBlocksData = [];
+    let blockFilterCoin = 'ALL';
+
+    const COIN_COLORS = {
+        LTC: '#345d9d', DOGE: '#c2a633', PEPE: '#3e8948', BELLS: '#c0872e',
+        LKY: '#4e9a06', JKC: '#6b4ce0', DINGO: '#e07b4c', SHIC: '#e04c4c', TRMP: '#cc3333'
+    };
+
+    // ── Auth ────────────────────────────────────────
+    function tryLogin() {
+        const key = document.getElementById('admin-key-input').value.trim();
+        if (!key) return;
+        ADMIN_KEY = key;
+        // Test key by hitting /api/admin/stats
+        apiFetch('/api/admin/stats').then(data => {
+            if (data.error) {
+                document.getElementById('login-error').textContent = 'Invalid admin key.';
+                ADMIN_KEY = '';
+            } else {
+                localStorage.setItem('hc_admin_key', ADMIN_KEY);
+                showAdmin();
+            }
+        }).catch(() => {
+            document.getElementById('login-error').textContent = 'Connection error.';
+            ADMIN_KEY = '';
+        });
+    }
+
+    function logout() {
+        ADMIN_KEY = '';
+        localStorage.removeItem('hc_admin_key');
+        document.getElementById('admin-content').classList.remove('visible');
+        document.getElementById('admin-login').classList.remove('hidden');
+        document.getElementById('admin-key-input').value = '';
+        if (refreshTimer) clearInterval(refreshTimer);
+    }
+
+    function showAdmin() {
+        document.getElementById('admin-login').classList.add('hidden');
+        document.getElementById('admin-content').classList.add('visible');
+        refreshAll();
+        if (refreshTimer) clearInterval(refreshTimer);
+        refreshTimer = setInterval(refreshAll, 30000);
+    }
+
+    // Auto-login if key in localStorage
+    if (ADMIN_KEY) {
+        apiFetch('/api/admin/stats').then(data => {
+            if (!data.error) showAdmin();
+            else { ADMIN_KEY = ''; localStorage.removeItem('hc_admin_key'); }
+        }).catch(() => {});
+    }
+
+    document.getElementById('admin-key-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') tryLogin();
+    });
+
+    // ── API Helper ──────────────────────────────────
+    function apiFetch(url, opts = {}) {
+        const headers = { 'X-Admin-Key': ADMIN_KEY, ...opts.headers };
+        if (opts.body) headers['Content-Type'] = 'application/json';
+        return fetch(url, { ...opts, headers }).then(r => r.json()).catch(e => ({ error: e.message }));
+    }
+
+    // ── Tabs ────────────────────────────────────────
+    function switchTab(name) {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+    }
+
+    // ── Refresh All ─────────────────────────────────
+    function refreshAll() {
+        loadStats();
+        loadMiners();
+        loadBlocks();
+        loadEarnings();
+        loadWithdrawals();
+        loadConfig();
+        loadAddresses();
+        document.getElementById('last-refresh').textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
+    }
+
+    // ── Format helpers ──────────────────────────────
+    function fmtNum(n) { return n == null ? '--' : n.toLocaleString(); }
+    function fmtFloat(n, d) { return n == null ? '--' : n.toFixed(d || 2); }
+    function fmtDate(s) {
+        if (!s) return '--';
+        const d = new Date(s);
+        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+    }
+    function shortAddr(a) { return a && a.length > 16 ? a.slice(0, 8) + '...' + a.slice(-8) : a; }
+    function shortHash(h) { return h && h.length > 16 ? h.slice(0, 10) + '...' + h.slice(-6) : h; }
+    function statusBadge(s) {
+        const cls = s === 'confirmed' ? 'badge-confirmed' : s === 'orphaned' ? 'badge-orphaned' : 'badge-pending';
+        return '<span class="badge ' + cls + '">' + s + '</span>';
+    }
+    function coinTag(sym) {
+        const bg = COIN_COLORS[sym] || '#666';
+        return '<span class="coin-tag" style="background:' + bg + '">' + sym + '</span>';
+    }
+    function fmtDiff(d) {
+        if (d >= 1e12) return (d/1e12).toFixed(2) + 'T';
+        if (d >= 1e9) return (d/1e9).toFixed(2) + 'G';
+        if (d >= 1e6) return (d/1e6).toFixed(2) + 'M';
+        if (d >= 1e3) return (d/1e3).toFixed(2) + 'K';
+        return fmtFloat(d, 2);
+    }
+
+    // ── Load Stats ──────────────────────────────────
+    function loadStats() {
+        apiFetch('/api/admin/stats').then(d => {
+            if (d.error) return;
+            document.getElementById('s-hashrate').textContent = d.hashrate_formatted;
+            document.getElementById('s-miners').textContent = fmtNum(d.miners);
+            document.getElementById('s-workers').textContent = fmtNum(d.workers);
+            document.getElementById('s-sps').textContent = fmtFloat(d.shares_per_sec);
+            document.getElementById('s-total-shares').textContent = fmtNum(d.total_shares);
+            document.getElementById('s-dbsize').textContent = d.db_size;
+            document.getElementById('s-blocks-found').textContent = fmtNum(d.blocks_found);
+            document.getElementById('s-blocks-confirmed').textContent = fmtNum(d.blocks_confirmed);
+            document.getElementById('s-blocks-pending').textContent = fmtNum(d.blocks_pending);
+            document.getElementById('s-blocks-orphaned').textContent = fmtNum(d.blocks_orphaned);
+            document.getElementById('s-fee').textContent = fmtFloat(d.fee_percent) + '%';
+            document.getElementById('s-pending-wd').textContent = fmtNum(d.pending_withdrawals);
+            document.getElementById('current-fee').textContent = fmtFloat(d.fee_percent);
+
+            // Coin table
+            const tbody = document.getElementById('coin-table-body');
+            tbody.innerHTML = '';
+            (d.coins || []).forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>' + coinTag(c.symbol) + ' ' + c.name + '</td>'
+                    + '<td>' + (c.is_parent ? '<span class="badge badge-confirmed">Parent</span>' : '<span class="badge badge-pending">Aux</span>') + '</td>'
+                    + '<td class="mono">' + fmtNum(c.height) + '</td>'
+                    + '<td class="mono">' + fmtDiff(c.difficulty) + '</td>'
+                    + '<td class="mono">' + fmtFloat(c.block_reward, 4) + '</td>'
+                    + '<td class="mono">' + fmtNum(c.blocks_found) + '</td>'
+                    + '<td class="mono">' + fmtFloat(c.total_balance, 8) + '</td>';
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    // ── Load Miners ─────────────────────────────────
+    function loadMiners() {
+        apiFetch('/api/admin/miners').then(d => {
+            if (d.error) return;
+            document.getElementById('miner-count').textContent = d.total;
+            const tbody = document.getElementById('miners-table-body');
+            tbody.innerHTML = '';
+            (d.miners || []).forEach(m => {
+                const balStr = (m.balances || []).map(b => fmtFloat(b.amount, 8) + ' ' + b.coin).join('<br>') || '--';
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="hash-cell" title="' + m.address + '">' + shortAddr(m.address) + '</td>'
+                    + '<td class="mono">' + m.hashrate_formatted + '</td>'
+                    + '<td class="mono">' + m.workers_online + '</td>'
+                    + '<td class="mono">' + fmtNum(m.total_shares) + '</td>'
+                    + '<td style="font-size:0.78rem">' + balStr + '</td>'
+                    + '<td style="font-size:0.78rem">' + fmtDate(m.last_seen) + '</td>';
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    // ── Load Blocks ─────────────────────────────────
+    function loadBlocks() {
+        apiFetch('/api/admin/blocks').then(d => {
+            if (d.error) return;
+            allBlocksData = d.blocks || [];
+            document.getElementById('block-count').textContent = d.total;
+
+            // Build coin filters
+            const coins = ['ALL', ...new Set(allBlocksData.map(b => b.coin))];
+            const filterEl = document.getElementById('block-filters');
+            filterEl.innerHTML = '';
+            coins.forEach(c => {
+                const btn = document.createElement('div');
+                btn.className = 'filter-tab' + (c === blockFilterCoin ? ' active' : '');
+                btn.textContent = c;
+                btn.onclick = () => { blockFilterCoin = c; renderBlocks(); document.querySelectorAll('#block-filters .filter-tab').forEach(f => f.classList.toggle('active', f.textContent === c)); };
+                filterEl.appendChild(btn);
+            });
+            renderBlocks();
+        });
+    }
+
+    function renderBlocks() {
+        const filtered = blockFilterCoin === 'ALL' ? allBlocksData : allBlocksData.filter(b => b.coin === blockFilterCoin);
+        const tbody = document.getElementById('blocks-table-body');
+        tbody.innerHTML = '';
+        filtered.forEach(b => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td class="mono">' + b.id + '</td>'
+                + '<td>' + coinTag(b.coin) + '</td>'
+                + '<td class="mono">' + fmtNum(b.height) + '</td>'
+                + '<td>' + statusBadge(b.status) + '</td>'
+                + '<td class="mono">' + fmtFloat(b.reward, 4) + '</td>'
+                + '<td class="hash-cell" title="' + b.miner + '">' + shortAddr(b.miner) + '</td>'
+                + '<td class="mono">' + fmtNum(b.confirmations) + '</td>'
+                + '<td class="hash-cell" title="' + b.block_hash + '">' + shortHash(b.block_hash) + '</td>'
+                + '<td style="font-size:0.78rem">' + fmtDate(b.created_at) + '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ── Load Earnings ───────────────────────────────
+    function loadEarnings() {
+        apiFetch('/api/admin/earnings').then(d => {
+            if (d.error) return;
+            document.getElementById('earning-count').textContent = d.total;
+            const tbody = document.getElementById('earnings-table-body');
+            tbody.innerHTML = '';
+            (d.earnings || []).forEach(e => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="mono">' + e.id + '</td>'
+                    + '<td class="hash-cell" title="' + e.miner + '">' + shortAddr(e.miner) + '</td>'
+                    + '<td>' + coinTag(e.coin) + '</td>'
+                    + '<td class="mono">' + (e.block_id || '--') + '</td>'
+                    + '<td class="mono">' + fmtFloat(e.amount, 8) + '</td>'
+                    + '<td>' + statusBadge(e.status) + '</td>'
+                    + '<td style="font-size:0.78rem">' + fmtDate(e.created_at) + '</td>';
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    // ── Load Withdrawals ────────────────────────────
+    function loadWithdrawals() {
+        apiFetch('/api/admin/withdrawals').then(d => {
+            if (d.error) return;
+            document.getElementById('withdrawal-count').textContent = d.total;
+            document.getElementById('withdrawal-pending').textContent = d.pending;
+            const tbody = document.getElementById('withdrawals-table-body');
+            tbody.innerHTML = '';
+            (d.withdrawals || []).forEach(w => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="mono">' + w.id + '</td>'
+                    + '<td class="hash-cell" title="' + w.miner + '">' + shortAddr(w.miner) + '</td>'
+                    + '<td>' + coinTag(w.coin) + '</td>'
+                    + '<td class="mono">' + fmtFloat(w.amount, 8) + '</td>'
+                    + '<td class="mono">' + fmtFloat(w.fee, 8) + '</td>'
+                    + '<td>' + statusBadge(w.status) + '</td>'
+                    + '<td class="hash-cell" title="' + (w.tx_hash || '') + '">' + (w.tx_hash ? shortHash(w.tx_hash) : '--') + '</td>'
+                    + '<td style="font-size:0.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis" title="' + (w.error_message || '') + '">' + (w.error_message || '--') + '</td>'
+                    + '<td style="font-size:0.78rem">' + fmtDate(w.created_at) + '</td>'
+                    + '<td style="font-size:0.78rem">' + fmtDate(w.completed_at) + '</td>';
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    // ── Load Config ─────────────────────────────────
+    function loadConfig() {
+        apiFetch('/api/admin/config').then(d => {
+            if (d.error) return;
+            const grid = document.getElementById('config-grid');
+            grid.innerHTML = '';
+            const items = [
+                ['Pool Name', d.pool_name],
+                ['Fee', d.fee_percent + '%'],
+                ['PPLNS Window', fmtNum(d.pplns_window) + ' shares'],
+                ['Confirmation Depth', d.block_confirmation_depth + ' blocks'],
+                ['Pool Address', d.pool_address],
+                ['API Port', d.api_port],
+            ];
+            items.forEach(([label, val]) => {
+                const div = document.createElement('div');
+                div.className = 'config-item';
+                div.innerHTML = '<div class="config-label">' + label + '</div><div class="config-value">' + val + '</div>';
+                grid.appendChild(div);
+            });
+
+            // Stratum ports
+            const spBody = document.getElementById('stratum-ports-body');
+            spBody.innerHTML = '';
+            (d.stratum_ports || []).forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="mono">' + p.port + '</td>'
+                    + '<td>' + p.name + '</td>'
+                    + '<td class="mono">' + fmtDiff(p.difficulty) + '</td>'
+                    + '<td>' + (p.vardiff ? '<span class="badge badge-confirmed">Yes</span>' : '<span class="badge badge-pending">No</span>') + '</td>';
+                spBody.appendChild(tr);
+            });
+
+            // Coin config (now includes reward_address)
+            const ccBody = document.getElementById('coin-config-body');
+            ccBody.innerHTML = '';
+            (d.coins || []).forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>' + c.name + '</td>'
+                    + '<td>' + coinTag(c.symbol) + '</td>'
+                    + '<td>' + (c.is_parent ? 'Parent' : 'Aux (merge-mined)') + '</td>'
+                    + '<td class="mono">' + fmtFloat(c.block_reward, 4) + '</td>'
+                    + '<td class="mono">' + c.confirmation_depth + '</td>'
+                    + '<td class="mono" style="font-size:0.78rem">' + c.rpc_url + '</td>'
+                    + '<td class="mono" style="font-size:0.72rem;word-break:break-all">' + (c.reward_address || '--') + '</td>';
+                ccBody.appendChild(tr);
+            });
+        });
+    }
+
+    // ── Load Addresses ──────────────────────────────
+    function loadAddresses() {
+        apiFetch('/api/admin/addresses').then(d => {
+            if (d.error) return;
+
+            // Pool address
+            document.getElementById('pool-address-display').textContent = d.pool_address || '--';
+
+            // Reward addresses
+            const list = document.getElementById('reward-addresses-list');
+            list.innerHTML = '';
+            (d.coins || []).forEach(c => {
+                const row = document.createElement('div');
+                row.className = 'address-row';
+                row.id = 'reward-row-' + c.symbol;
+
+                const label = document.createElement('div');
+                label.className = 'addr-label';
+                label.textContent = c.symbol;
+
+                const typeSpan = document.createElement('div');
+                typeSpan.className = 'addr-type';
+                typeSpan.textContent = c.is_parent ? 'Parent' : 'Aux';
+
+                const value = document.createElement('div');
+                value.className = 'addr-value';
+                value.id = 'reward-addr-' + c.symbol;
+                value.textContent = c.reward_address || '--';
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn-edit-addr';
+                editBtn.textContent = 'Edit';
+                editBtn.onclick = () => editRewardAddress(c.symbol, c.reward_address || '');
+
+                row.appendChild(label);
+                row.appendChild(typeSpan);
+                row.appendChild(value);
+                row.appendChild(editBtn);
+                list.appendChild(row);
+
+                // Edit form (hidden by default)
+                const editForm = document.createElement('div');
+                editForm.className = 'address-edit-form';
+                editForm.id = 'reward-edit-' + c.symbol;
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'reward-input-' + c.symbol;
+                input.placeholder = 'New ' + c.symbol + ' reward address...';
+
+                const saveBtn = document.createElement('button');
+                saveBtn.className = 'btn-save-addr';
+                saveBtn.textContent = 'Save';
+                saveBtn.onclick = () => saveRewardAddress(c.symbol);
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn-cancel-addr';
+                cancelBtn.textContent = 'Cancel';
+                cancelBtn.onclick = () => cancelRewardEdit(c.symbol);
+
+                editForm.appendChild(input);
+                editForm.appendChild(saveBtn);
+                editForm.appendChild(cancelBtn);
+                list.appendChild(editForm);
+            });
+        });
+    }
+
+    // ── Pool Address Edit ───────────────────────────
+    function editPoolAddress() {
+        const current = document.getElementById('pool-address-display').textContent;
+        document.getElementById('pool-address-input').value = current !== '--' ? current : '';
+        document.getElementById('pool-address-edit').classList.add('active');
+    }
+
+    function cancelPoolAddressEdit() {
+        document.getElementById('pool-address-edit').classList.remove('active');
+        document.getElementById('pool-address-result').textContent = '';
+    }
+
+    function savePoolAddress() {
+        const addr = document.getElementById('pool-address-input').value.trim();
+        if (!addr) {
+            showAddressResult('pool-address-result', 'Address cannot be empty', false);
+            return;
+        }
+        apiFetch('/api/admin/pool-address', {
+            method: 'POST',
+            body: JSON.stringify({ pool_address: addr })
+        }).then(d => {
+            if (d.success) {
+                showAddressResult('pool-address-result', d.message, true);
+                document.getElementById('pool-address-display').textContent = addr;
+                document.getElementById('pool-address-edit').classList.remove('active');
+            } else {
+                showAddressResult('pool-address-result', d.message || 'Failed', false);
+            }
+        });
+    }
+
+    // ── Reward Address Edit ─────────────────────────
+    function editRewardAddress(symbol, currentAddr) {
+        // Hide all other edit forms
+        document.querySelectorAll('.address-edit-form').forEach(f => f.classList.remove('active'));
+        document.getElementById('reward-input-' + symbol).value = currentAddr;
+        document.getElementById('reward-edit-' + symbol).classList.add('active');
+    }
+
+    function cancelRewardEdit(symbol) {
+        document.getElementById('reward-edit-' + symbol).classList.remove('active');
+        document.getElementById('reward-address-result').textContent = '';
+    }
+
+    function saveRewardAddress(symbol) {
+        const addr = document.getElementById('reward-input-' + symbol).value.trim();
+        if (!addr) {
+            showAddressResult('reward-address-result', 'Address cannot be empty', false);
+            return;
+        }
+        apiFetch('/api/admin/reward-address', {
+            method: 'POST',
+            body: JSON.stringify({ coin: symbol, reward_address: addr })
+        }).then(d => {
+            if (d.success) {
+                showAddressResult('reward-address-result', d.message, true);
+                document.getElementById('reward-addr-' + symbol).textContent = addr;
+                document.getElementById('reward-edit-' + symbol).classList.remove('active');
+            } else {
+                showAddressResult('reward-address-result', d.message || 'Failed', false);
+            }
+        });
+    }
+
+    // ── Address Result Helper ───────────────────────
+    function showAddressResult(elementId, msg, ok) {
+        const el = document.getElementById(elementId);
+        el.textContent = msg;
+        el.className = 'address-result ' + (ok ? 'success' : 'error');
+        setTimeout(() => { el.textContent = ''; }, 8000);
+    }
+
+    // ── Update Fee ──────────────────────────────────
+    function updateFee() {
+        const input = document.getElementById('new-fee');
+        const fee = parseFloat(input.value);
+        if (isNaN(fee) || fee < 0 || fee > 100) {
+            showFeeResult('Fee must be between 0 and 100', false);
+            return;
+        }
+        apiFetch('/api/admin/fee', {
+            method: 'POST',
+            body: JSON.stringify({ fee_percent: fee })
+        }).then(d => {
+            if (d.success) {
+                showFeeResult(d.message, true);
+                document.getElementById('current-fee').textContent = fmtFloat(d.new_fee);
+                input.value = '';
+            } else {
+                showFeeResult(d.message || 'Failed', false);
+            }
+        });
+    }
+
+    function showFeeResult(msg, ok) {
+        const el = document.getElementById('fee-result');
+        el.textContent = msg;
+        el.className = 'fee-result ' + (ok ? 'success' : 'error');
+        setTimeout(() => { el.textContent = ''; }, 5000);
+    }
+    
+function changePassword() {
+  var cur = document.getElementById("currentPw").value;
+  var np = document.getElementById("newPw").value;
+  var cp = document.getElementById("confirmPw").value;
+  var msg = document.getElementById("pwMsg");
+  if (np !== cp) { msg.textContent = "Passwords do not match"; msg.style.color = "#dc3545"; return; }
+  if (np.length < 4) { msg.textContent = "Password must be at least 4 characters"; msg.style.color = "#dc3545"; return; }
+  fetch("/api/admin/password", {
+    method: "POST",
+    headers: {"Content-Type":"application/json","X-Admin-Key":cur},
+    body: JSON.stringify({current_password: cur, new_password: np})
+  }).then(r=>r.json()).then(d=>{
+    if(d.success){
+      msg.textContent = "Password changed! Updating stored key...";
+      msg.style.color = "#3fb950";
+      localStorage.setItem("adminKey", np);
+      adminKey = np;
+    } else {
+      msg.textContent = d.error || "Failed";
+      msg.style.color = "#dc3545";
+    }
+  }).catch(e=>{ msg.textContent = "Error: " + e; msg.style.color = "#dc3545"; });
+}
+
+</script>
+</body>
+</html>

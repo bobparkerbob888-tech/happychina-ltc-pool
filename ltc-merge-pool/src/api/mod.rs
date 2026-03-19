@@ -2,6 +2,7 @@ pub mod pool;
 pub mod miner;
 pub mod blocks;
 pub mod withdraw;
+pub mod admin;
 
 use actix_web::web;
 
@@ -15,6 +16,18 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
             .route("/miner/{addr}", web::get().to(miner::get_miner_info))
             .route("/miner/{addr}/workers", web::get().to(miner::get_miner_workers))
             .route("/miner/{addr}/history", web::get().to(miner::get_miner_history))
-            .route("/withdraw", web::post().to(withdraw::create_withdrawal)),
+            .route("/withdraw", web::post().to(withdraw::create_withdrawal))
+            // Admin endpoints
+            .route("/admin/stats", web::get().to(admin::get_stats))
+            .route("/admin/config", web::get().to(admin::get_config))
+            .route("/admin/fee", web::post().to(admin::update_fee))
+            .route("/admin/miners", web::get().to(admin::get_miners))
+            .route("/admin/blocks", web::get().to(admin::get_blocks))
+            .route("/admin/earnings", web::get().to(admin::get_earnings))
+            .route("/admin/withdrawals", web::get().to(admin::get_withdrawals))
+            .route("/admin/pool-address", web::post().to(admin::update_pool_address))
+            .route("/admin/addresses", web::get().to(admin::get_addresses))
+            .route("/admin/reward-address", web::post().to(admin::update_reward_address))
+            .route("/admin/password", web::post().to(admin::update_password)),
     );
 }

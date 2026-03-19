@@ -16,6 +16,7 @@ pub struct PoolConfig {
     pub pplns_window: u64,
     pub block_confirmation_depth: u64,
     pub pool_address: String,
+    pub admin_key: Option<String>,
     #[serde(default = "default_api_port")]
     pub api_port: u16,
 }
