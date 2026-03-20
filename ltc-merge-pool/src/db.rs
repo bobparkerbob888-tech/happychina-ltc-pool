@@ -181,6 +181,16 @@ pub struct WithdrawalRow {
     pub error_message: Option<String>,
     pub created_at: DateTime<Utc>,
     pub completed_at: Option<DateTime<Utc>>,
+    pub payout_address: Option<String>,
+}
+
+/// A payout address record
+#[derive(Debug, Clone, sqlx::FromRow)]
+pub struct PayoutAddressRow {
+    pub miner: String,
+    pub coin: String,
+    pub address: String,
+    pub created_at: DateTime<Utc>,
 }
 
 /// A pool stats record
@@ -744,6 +754,29 @@ impl Db {
         Ok(row.get("id"))
     }
 
+    /// Create a new withdrawal request with a specific payout address
+    pub async fn create_withdrawal_with_address(
+        &self,
+        miner: &str,
+        coin: &str,
+        amount: f64,
+        fee: f64,
+        payout_address: &str,
+    ) -> Result<i32, sqlx::Error> {
+        let row = sqlx::query(
+            "INSERT INTO withdrawals (miner, coin, amount, fee, payout_address)
+             VALUES ($1, $2, $3, $4, $5) RETURNING id",
+        )
+        .bind(miner)
+        .bind(coin)
+        .bind(amount)
+        .bind(fee)
+        .bind(payout_address)
+        .fetch_one(&self.pool)
+        .await?;
+        Ok(row.get("id"))
+    }
+
     /// Mark a withdrawal as completed with tx hash
     pub async fn complete_withdrawal(
         &self,
@@ -780,7 +813,7 @@ impl Db {
     /// Get pending withdrawals
     pub async fn get_pending_withdrawals(&self) -> Result<Vec<WithdrawalRow>, sqlx::Error> {
         sqlx::query_as::<_, WithdrawalRow>(
-            "SELECT id, miner, coin, amount, fee, tx_hash, status, error_message, created_at, completed_at
+            "SELECT id, miner, coin, amount, fee, tx_hash, status, error_message, created_at, completed_at, payout_address
              FROM withdrawals WHERE status = 'pending' ORDER BY created_at ASC",
         )
         .fetch_all(&self.pool)
@@ -794,7 +827,7 @@ impl Db {
         limit: i64,
     ) -> Result<Vec<WithdrawalRow>, sqlx::Error> {
         sqlx::query_as::<_, WithdrawalRow>(
-            "SELECT id, miner, coin, amount, fee, tx_hash, status, error_message, created_at, completed_at
+            "SELECT id, miner, coin, amount, fee, tx_hash, status, error_message, created_at, completed_at, payout_address
              FROM withdrawals WHERE miner = $1 ORDER BY created_at DESC LIMIT $2",
         )
         .bind(miner)
@@ -1018,5 +1051,74 @@ impl Db {
                 )
             })
             .collect())
+    }
+
+    // ── Payout Addresses ──────────────────────────────────
+
+    /// Set or update a payout address for a miner and coin
+    pub async fn set_payout_address(
+        &self,
+        miner: &str,
+        coin: &str,
+        address: &str,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "INSERT INTO payout_addresses (miner, coin, address)
+             VALUES ($1, $2, $3)
+             ON CONFLICT (miner, coin) DO UPDATE SET address = $3, created_at = NOW()",
+        )
+        .bind(miner)
+        .bind(coin)
+        .bind(address)
+        .execute(&self.pool)
+        .await?;
+        Ok(())
+    }
+
+    /// Get payout address for a specific miner and coin
+    pub async fn get_payout_address(
+        &self,
+        miner: &str,
+        coin: &str,
+    ) -> Result<Option<String>, sqlx::Error> {
+        let row = sqlx::query(
+            "SELECT address FROM payout_addresses WHERE miner = $1 AND coin = $2",
+        )
+        .bind(miner)
+        .bind(coin)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(row.map(|r| r.get::<String, _>("address")))
+    }
+
+    /// Get all payout addresses for a miner
+    pub async fn get_payout_addresses(
+        &self,
+        miner: &str,
+    ) -> Result<Vec<PayoutAddressRow>, sqlx::Error> {
+        sqlx::query_as::<_, PayoutAddressRow>(
+            "SELECT miner, coin, address, created_at
+             FROM payout_addresses WHERE miner = $1 ORDER BY coin",
+        )
+        .bind(miner)
+        .fetch_all(&self.pool)
+        .await
+    }
+
+    /// Delete a payout address for a miner and coin
+    pub async fn delete_payout_address(
+        &self,
+        miner: &str,
+        coin: &str,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "DELETE FROM payout_addresses WHERE miner = $1 AND coin = $2",
+        )
+        .bind(miner)
+        .bind(coin)
+        .execute(&self.pool)
+        .await?;
+        Ok(())
     }
 }

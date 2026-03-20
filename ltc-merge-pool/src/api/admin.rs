@@ -156,6 +156,7 @@ struct AdminWithdrawalInfo {
     error_message: Option<String>,
     created_at: String,
     completed_at: Option<String>,
+    payout_address: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -848,7 +849,7 @@ pub async fn get_withdrawals(req: HttpRequest, data: web::Data<AppState>) -> Htt
     let db = &data.db;
 
     let withdrawals = sqlx::query_as::<_, crate::db::WithdrawalRow>(
-        "SELECT id, miner, coin, amount, fee, tx_hash, status, error_message, created_at, completed_at
+        "SELECT id, miner, coin, amount, fee, tx_hash, status, error_message, created_at, completed_at, payout_address
          FROM withdrawals ORDER BY created_at DESC LIMIT 500"
     )
     .fetch_all(db.pool())
@@ -880,6 +881,7 @@ pub async fn get_withdrawals(req: HttpRequest, data: web::Data<AppState>) -> Htt
             error_message: w.error_message.clone(),
             created_at: w.created_at.to_rfc3339(),
             completed_at: w.completed_at.map(|t| t.to_rfc3339()),
+            payout_address: w.payout_address.clone(),
         })
         .collect();
 

@@ -86,6 +86,11 @@ pub async fn distribute_pplns(
 
 /// Start the withdrawal processor background task.
 /// Processes pending withdrawals by sending coins via RPC.
+///
+/// NOTE: With the new withdraw endpoint, withdrawals are now processed
+/// synchronously (send + debit happens in the API handler). This background
+/// processor serves as a safety net for any withdrawals that were created
+/// but not yet processed (e.g., if the server crashed mid-withdrawal).
 pub async fn run_withdrawal_processor(
     db: Db,
     rpc_clients: Arc<HashMap<String, RpcClient>>,
@@ -105,6 +110,8 @@ pub async fn run_withdrawal_processor(
 }
 
 /// Process all pending withdrawals.
+///
+/// Fixed flow: balance is only deducted AFTER a successful send.
 async fn process_withdrawals(
     db: &Db,
     rpc_clients: &HashMap<String, RpcClient>,
@@ -127,9 +134,12 @@ async fn process_withdrawals(
             }
         };
 
-        // The miner address IS the withdrawal destination
-        // (users mine to their own address, withdraw to the same)
-        let address = &withdrawal.miner;
+        // Use the stored payout_address if set, otherwise fall back to miner address
+        let address = withdrawal
+            .payout_address
+            .as_deref()
+            .unwrap_or(&withdrawal.miner);
+
         let amount = withdrawal.amount - withdrawal.fee;
 
         if amount <= 0.0 {
@@ -137,22 +147,54 @@ async fn process_withdrawals(
             continue;
         }
 
+        // Validate the address before sending
+        match rpc.validate_address(address).await {
+            Ok(result) => {
+                if !result.isvalid {
+                    let msg = format!(
+                        "Payout address {} is not valid for {}",
+                        address, withdrawal.coin
+                    );
+                    warn!("Withdrawal {}: {}", withdrawal.id, msg);
+                    db.fail_withdrawal(withdrawal.id, &msg).await?;
+                    continue;
+                }
+            }
+            Err(e) => {
+                let msg = format!("Failed to validate address: {}", e);
+                warn!("Withdrawal {}: {}", withdrawal.id, msg);
+                db.fail_withdrawal(withdrawal.id, &msg).await?;
+                continue;
+            }
+        }
+
         info!(
-            "Sending {:.8} {} to {} (withdrawal id={})",
-            amount, withdrawal.coin, address, withdrawal.id
+            "Sending {:.8} {} to {} (withdrawal id={}, miner={})",
+            amount, withdrawal.coin, address, withdrawal.id, withdrawal.miner
         );
 
         match rpc.send_to_address(address, amount).await {
             Ok(txid) => {
                 info!(
-                    "Withdrawal {} completed: txid={}",
-                    withdrawal.id, txid
+                    "Withdrawal {} completed: txid={} to={}",
+                    withdrawal.id, txid, address
                 );
+
+                // Deduct balance AFTER successful send
+                if let Err(e) = db.debit_balance(&withdrawal.miner, &withdrawal.coin, withdrawal.amount).await {
+                    error!(
+                        "CRITICAL: Withdrawal {} sent (txid={}) but balance deduction failed: {}. \
+                         Miner={} Coin={} Amount={:.8}. Manual intervention required!",
+                        withdrawal.id, txid, e, withdrawal.miner, withdrawal.coin, withdrawal.amount
+                    );
+                }
+
                 db.complete_withdrawal(withdrawal.id, &txid).await?;
             }
             Err(e) => {
                 let msg = format!("sendtoaddress failed: {}", e);
                 error!("Withdrawal {} failed: {}", withdrawal.id, msg);
+                // Do NOT deduct balance on failure
                 db.fail_withdrawal(withdrawal.id, &msg).await?;
             }
         }

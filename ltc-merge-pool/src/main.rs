@@ -103,6 +103,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let database = db::Db::connect(&cfg.database.url).await?;
         let migration_sql = std::fs::read_to_string("migrations/001_initial.sql")?;
         database.run_migration(&migration_sql).await?;
+        // Run payout addresses migration
+        if let Ok(migration2) = std::fs::read_to_string("migrations/002_payout_addresses.sql") {
+            database.run_migration(&migration2).await?;
+        }
         info!("=== Database connection and migration successful! ===");
         return Ok(());
     }
@@ -119,6 +123,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Run migration
     let migration_sql = std::fs::read_to_string("migrations/001_initial.sql")?;
     database.run_migration(&migration_sql).await?;
+    // Run payout addresses migration
+    if let Ok(migration2) = std::fs::read_to_string("migrations/002_payout_addresses.sql") {
+        database.run_migration(&migration2).await?;
+    }
     info!("Database migration complete");
 
     // Wrap config and RPC clients in Arc for sharing

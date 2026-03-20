@@ -17,6 +17,9 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
             .route("/miner/{addr}/workers", web::get().to(miner::get_miner_workers))
             .route("/miner/{addr}/history", web::get().to(miner::get_miner_history))
             .route("/withdraw", web::post().to(withdraw::create_withdrawal))
+            // Payout address endpoints
+            .route("/payout-address", web::post().to(withdraw::set_payout_address))
+            .route("/payout-addresses/{miner}", web::get().to(withdraw::get_payout_addresses))
             // Admin endpoints
             .route("/admin/stats", web::get().to(admin::get_stats))
             .route("/admin/config", web::get().to(admin::get_config))

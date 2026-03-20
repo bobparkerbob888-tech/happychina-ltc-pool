@@ -271,6 +271,9 @@ async function loadMinerPage() {
 
 // ── Assets Page (assets.html) ──────────────────────
 
+// Cache payout addresses for the current miner
+var cachedPayoutAddresses = {};
+
 async function loadAssetsPage() {
     var params = new URLSearchParams(window.location.search);
     var addr = params.get("addr");
@@ -284,6 +287,15 @@ async function loadAssetsPage() {
     var data = await apiFetch("/miner/" + encodeURIComponent(addr));
     if (!data) return;
 
+    // Load payout addresses
+    var payoutData = await apiFetch("/payout-addresses/" + encodeURIComponent(addr));
+    cachedPayoutAddresses = {};
+    if (payoutData && payoutData.addresses) {
+        for (var p = 0; p < payoutData.addresses.length; p++) {
+            cachedPayoutAddresses[payoutData.addresses[p].coin] = payoutData.addresses[p].address;
+        }
+    }
+
     var allCoins = ["LTC","DOGE","PEPE","BELLS","LKY","JKC","DINGO","SHIC","TRMP"];
     var balMap = {};
     if (data.balances) {
@@ -292,21 +304,87 @@ async function loadAssetsPage() {
         }
     }
 
+    // Render payout addresses table
+    var payoutTbody = document.getElementById("payout-addresses-body");
+    if (payoutTbody) {
+        var phtml = "";
+        for (var k = 0; k < allCoins.length; k++) {
+            var sym = allCoins[k];
+            var payoutAddr = cachedPayoutAddresses[sym] || "";
+            var displayAddr = payoutAddr || (sym === "LTC" ? "(uses miner address)" : "(not set)");
+            var displayStyle = payoutAddr ? "" : "color:var(--text-muted);font-style:italic";
+            phtml += '<tr>';
+            phtml += '<td><div class="asset-coin-cell"><div class="coin-icon ' + coinIconClass(sym) + '">' + sym.substring(0,3) + '</div><div><div style="font-weight:600">' + sym + '</div></div></div></td>';
+            phtml += '<td class="mono" style="font-size:0.8rem;word-break:break-all;' + displayStyle + '">' + displayAddr + '</td>';
+            phtml += "<td><button class=\"btn btn-outline btn-sm\" onclick=\"openAddressModal('" + addr + "','" + sym + "')\">" + (payoutAddr ? "Change" : "Set") + "</button></td>";
+            phtml += '</tr>';
+        }
+        payoutTbody.innerHTML = phtml;
+    }
+
+    // Render balances table
     var tbody = document.getElementById("assets-body");
     if (tbody) {
         var ahtml = "";
         for (var j = 0; j < allCoins.length; j++) {
-            var sym = allCoins[j];
-            var bal = balMap[sym] || 0;
+            var sym2 = allCoins[j];
+            var bal = balMap[sym2] || 0;
             ahtml += '<tr>';
-            ahtml += '<td><div class="asset-coin-cell"><div class="coin-icon ' + coinIconClass(sym) + '">' + sym.substring(0,3) + '</div><div><div style="font-weight:600">' + sym + '</div></div></div></td>';
-            ahtml += '<td class="mono">' + formatCoin(bal, sym) + '</td>';
-            ahtml += "<td><button class=\"btn btn-outline btn-sm\" onclick=\"openWithdrawModal('" + addr + "','" + sym + "'," + bal + ")\">Withdraw</button></td>";
+            ahtml += '<td><div class="asset-coin-cell"><div class="coin-icon ' + coinIconClass(sym2) + '">' + sym2.substring(0,3) + '</div><div><div style="font-weight:600">' + sym2 + '</div></div></div></td>';
+            ahtml += '<td class="mono">' + formatCoin(bal, sym2) + '</td>';
+            ahtml += "<td><button class=\"btn btn-outline btn-sm\" onclick=\"openWithdrawModal('" + addr + "','" + sym2 + "'," + bal + ")\">Withdraw</button></td>";
             ahtml += '</tr>';
         }
         tbody.innerHTML = ahtml;
     }
 }
+
+// ── Payout Address Modal ───────────────────────────
+
+function openAddressModal(miner, coin) {
+    document.getElementById("address-modal-coin").textContent = coin;
+    document.getElementById("address-modal-miner").value = miner;
+    document.getElementById("address-modal-coin-hidden").value = coin;
+    document.getElementById("address-modal-input").value = cachedPayoutAddresses[coin] || "";
+    document.getElementById("address-modal-error").style.display = "none";
+    document.getElementById("address-modal-overlay").classList.add("active");
+}
+
+function closeAddressModal() {
+    document.getElementById("address-modal-overlay").classList.remove("active");
+}
+
+async function submitPayoutAddress() {
+    var miner = document.getElementById("address-modal-miner").value;
+    var coin = document.getElementById("address-modal-coin-hidden").value;
+    var address = document.getElementById("address-modal-input").value.trim();
+
+    var errorEl = document.getElementById("address-modal-error");
+
+    if (!address || address.length < 20) {
+        errorEl.textContent = "Please enter a valid address";
+        errorEl.style.display = "block";
+        return;
+    }
+
+    var result = await apiPost("/payout-address", {
+        miner: miner,
+        coin: coin,
+        address: address
+    });
+
+    if (result.success) {
+        closeAddressModal();
+        showToast(result.message, "success");
+        // Refresh the page to show updated addresses
+        setTimeout(function() { loadAssetsPage(); }, 500);
+    } else {
+        errorEl.textContent = result.message || "Failed to set address";
+        errorEl.style.display = "block";
+    }
+}
+
+// ── Withdraw Modal ─────────────────────────────────
 
 function openWithdrawModal(addr, coin, balance) {
     document.getElementById("withdraw-coin").textContent = coin;
@@ -315,6 +393,23 @@ function openWithdrawModal(addr, coin, balance) {
     document.getElementById("withdraw-addr").value = addr;
     document.getElementById("withdraw-coin-hidden").value = coin;
     document.getElementById("withdraw-max").value = balance;
+
+    // Show where the withdrawal will go
+    var infoEl = document.getElementById("withdraw-payout-info");
+    if (infoEl) {
+        var payoutAddr = cachedPayoutAddresses[coin];
+        if (payoutAddr) {
+            infoEl.textContent = "Sending to: " + payoutAddr;
+            infoEl.style.color = "var(--text-muted)";
+        } else if (coin === "LTC") {
+            infoEl.textContent = "Sending to: " + addr + " (miner address)";
+            infoEl.style.color = "var(--text-muted)";
+        } else {
+            infoEl.textContent = "No payout address set for " + coin + ". Please set one first.";
+            infoEl.style.color = "#e74c3c";
+        }
+    }
+
     document.getElementById("modal-overlay").classList.add("active");
 }
 
