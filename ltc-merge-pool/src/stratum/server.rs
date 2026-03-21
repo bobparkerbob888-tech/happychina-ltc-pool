@@ -717,8 +717,10 @@ impl StratumServer {
                                     );
                                 }
 
+                                // Collect aux blocks that meet their targets, then submit ALL in parallel
+                                let mut aux_tasks: Vec<tokio::task::JoinHandle<()>> = Vec::new();
+
                                 for &(chain_id, ref _aux_hash) in &job.aux_blocks {
-                                    // Check if this share meets the aux chain's difficulty
                                     let meets_aux_target = match job.aux_targets.get(&chain_id) {
                                         Some(aux_target) => {
                                             let meets = crate::crypto::encoding::hash_le_target(&hash_arr, aux_target);
@@ -735,7 +737,6 @@ impl StratumServer {
                                             meets
                                         }
                                         None => {
-                                            // No target stored - skip (shouldn't happen)
                                             warn!("No aux target for chain_id={}, skipping (aux_targets has {} entries)", chain_id, job.aux_targets.len());
                                             false
                                         }
@@ -745,28 +746,17 @@ impl StratumServer {
                                         continue;
                                     }
 
-                                    // Look up which coin this chain_id belongs to
                                     let coin_symbol = match job.chain_id_to_symbol.get(&chain_id) {
                                         Some(s) => s.clone(),
-                                        None => {
-                                            warn!("No coin symbol for chain_id={}, skipping", chain_id);
-                                            continue;
-                                        }
+                                        None => { warn!("No coin symbol for chain_id={}, skipping", chain_id); continue; }
                                     };
-                                    // Get the display-order hash for submitauxblock
                                     let aux_hash_hex = match job.aux_display_hashes.get(&chain_id) {
                                         Some(h) => h.clone(),
-                                        None => {
-                                            warn!("No display hash for chain_id={} ({}), skipping", chain_id, coin_symbol);
-                                            continue;
-                                        }
+                                        None => { warn!("No display hash for chain_id={} ({}), skipping", chain_id, coin_symbol); continue; }
                                     };
                                     let aux_coin_config = match config.coin_by_symbol(&coin_symbol) {
                                         Some(c) => c,
-                                        None => {
-                                            warn!("No config for coin {}, skipping", coin_symbol);
-                                            continue;
-                                        }
+                                        None => { warn!("No config for coin {}, skipping", coin_symbol); continue; }
                                     };
 
                                     info!(
@@ -782,40 +772,56 @@ impl StratumServer {
                                             "Submitting aux block {} chain_id={} hash={}...",
                                             coin_symbol, chain_id, &aux_hash_hex[..16]
                                         );
-                                        debug!(
-                                            "  auxpow len={} first80={}...",
-                                            auxpow_hex.len(),
-                                            &auxpow_hex[..std::cmp::min(80, auxpow_hex.len())]
-                                        );
-                                        match aux_rpc.submit_aux_block(&aux_hash_hex,
-                                            &auxpow_hex).await {
-                                            Ok(()) => {
-                                                info!("*** AUX BLOCK {} ACCEPTED ***", coin_symbol);
-                                                if let Some(ref db) = self.db {
-                                                    let bi = crate::db::BlockInsert {
-                                                        coin: coin_symbol.clone(),
-                                                        height: job.aux_heights.get(&chain_id).copied().unwrap_or(0) as i64,
-                                                        hash: aux_hash_hex.clone(),
-                                                        block_hash: String::new(),
-                                                        miner: miner.clone(),
-                                                        worker: worker.clone(),
-                                                        reward: aux_coin_config.block_reward,
-                                                        difficulty: result.share_difficulty,
-                                                        net_difficulty: 0.0,
-                                                    };
-                                                    match db.insert_block(&bi).await {
-                                                        Ok(id) => info!("Aux {} recorded id={}", coin_symbol, id),
-                                                        Err(e) => error!("DB aux insert {} err: {}", coin_symbol, e),
+
+                                        // Clone everything needed for the spawned task
+                                        let aux_rpc = aux_rpc.clone();
+                                        let db = self.db.clone();
+                                        let coin_symbol = coin_symbol.clone();
+                                        let aux_hash_hex = aux_hash_hex.clone();
+                                        let miner = miner.clone();
+                                        let worker = worker.clone();
+                                        let block_reward = aux_coin_config.block_reward;
+                                        let share_diff = result.share_difficulty;
+                                        let aux_height = job.aux_heights.get(&chain_id).copied().unwrap_or(0) as i64;
+
+                                        aux_tasks.push(tokio::spawn(async move {
+                                            match aux_rpc.submit_aux_block(&aux_hash_hex, &auxpow_hex).await {
+                                                Ok(()) => {
+                                                    info!("*** AUX BLOCK {} ACCEPTED ***", coin_symbol);
+                                                    if let Some(ref db) = db {
+                                                        let bi = crate::db::BlockInsert {
+                                                            coin: coin_symbol.clone(),
+                                                            height: aux_height,
+                                                            hash: aux_hash_hex.clone(),
+                                                            block_hash: String::new(),
+                                                            miner: miner.clone(),
+                                                            worker: worker.clone(),
+                                                            reward: block_reward,
+                                                            difficulty: share_diff,
+                                                            net_difficulty: 0.0,
+                                                        };
+                                                        match db.insert_block(&bi).await {
+                                                            Ok(id) => info!("Aux {} recorded id={}", coin_symbol, id),
+                                                            Err(e) => error!("DB aux insert {} err: {}", coin_symbol, e),
+                                                        }
                                                     }
                                                 }
+                                                Err(e) => {
+                                                    error!(
+                                                        "[{}] submitauxblock FAILED chain_id={} hash={}: {}",
+                                                        coin_symbol, chain_id, &aux_hash_hex[..16], e
+                                                    );
+                                                }
                                             }
-                                            Err(e) => {
-                                                error!(
-                                                    "[{}] submitauxblock FAILED chain_id={} hash={}: {}",
-                                                    coin_symbol, chain_id, &aux_hash_hex[..16], e
-                                                );
-                                            }
-                                        }
+                                        }));
+                                    }
+                                }
+
+                                // Wait for all aux submissions to complete
+                                if !aux_tasks.is_empty() {
+                                    info!("Submitting {} aux blocks in parallel...", aux_tasks.len());
+                                    for task in aux_tasks {
+                                        let _ = task.await;
                                     }
                                 }
                             }
