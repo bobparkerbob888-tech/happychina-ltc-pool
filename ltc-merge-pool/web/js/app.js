@@ -241,8 +241,6 @@ async function loadMinerPage() {
 
     // Workers
     var workersData = await apiFetch("/miner/" + encodeURIComponent(addr) + "/workers");
-    var bestSharesData = await apiFetch("/best-shares/" + encodeURIComponent(addr));
-    var bestShares = bestSharesData || {};
     var workersTbody = document.getElementById("workers-body");
     if (workersTbody && workersData && workersData.workers) {
         if (workersData.workers.length === 0) {
@@ -254,9 +252,7 @@ async function loadMinerPage() {
                 var statusCls = w.is_online ? "badge-online" : "badge-offline";
                 var statusTxt = w.is_online ? "Online" : "Offline";
                 whtml += '<tr>';
-                var bs = bestShares[w.name] || 0;
                 whtml += '<td class="mono">' + w.name + '</td>';
-                whtml += '<td class="mono">' + formatDifficultyShort(bs) + '</td>';
                 whtml += '<td class="mono">' + w.hashrate_formatted + '</td>';
                 whtml += '<td class="mono">' + formatNumber(w.difficulty) + '</td>';
                 whtml += '<td>' + timeAgo(w.last_seen) + '</td>';
@@ -300,7 +296,7 @@ async function loadAssetsPage() {
         }
     }
 
-    var allCoins = ["LTC","DOGE","PEPE","BELLS","LKY","JKC","DINGO","SHIC","TRMP"];
+    var allCoins = ["LTC","DOGE","PEPE","BELLS","LKY","JKC","DINGO","TRMP"];
     var balMap = {};
     if (data.balances) {
         for (var i = 0; i < data.balances.length; i++) {
