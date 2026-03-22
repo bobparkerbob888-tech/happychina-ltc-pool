@@ -6,6 +6,7 @@ mod rpc;
 mod types;
 mod jobs;
 mod api;
+mod zmq_sub;
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -222,7 +223,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         info!("Withdrawal processor background task started (30s interval)");
     }
 
-    // 11. Start job creation loop (polls getblocktemplate + createauxblock)
+    // 11. Start ZMQ subscribers for instant block notifications
+    let zmq_endpoints: Vec<(String, String)> = config.coins.iter()
+        .filter_map(|c| c.zmq_hashblock.as_ref().map(|z| (c.symbol.clone(), z.clone())))
+        .collect();
+    let zmq_rx = zmq_sub::spawn_zmq_subscribers(zmq_endpoints);
+    info!("ZMQ subscribers started for {} coins", config.coins.len());
+
+    // 12. Start job creation loop (ZMQ-triggered + fallback polling)
     {
         let jm = Arc::clone(&job_manager);
         let bc = Arc::clone(&broadcaster);
@@ -232,12 +240,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let ss = Arc::clone(&stratum_server);
 
         tokio::spawn(async move {
-            run_job_loop(jm, bc, rpc_clone, cfg_clone, db_clone, ss).await;
+            run_job_loop(jm, bc, rpc_clone, cfg_clone, db_clone, ss, zmq_rx).await;
         });
-        info!("Job creation loop started");
+        info!("Job creation loop started (ZMQ + 10s fallback polling)");
     }
 
-    // 12. Start HTTP API + static file server
+    // 13. Start HTTP API + static file server
     let http_db = database.clone();
     let http_config = Arc::clone(&config);
     let http_rpc = Arc::clone(&rpc_clients);
@@ -281,12 +289,23 @@ async fn run_job_loop(
     config: Arc<config::Config>,
     db: db::Db,
     stratum_server: Arc<StratumServer>,
+    mut zmq_rx: tokio::sync::mpsc::Receiver<String>,
 ) {
     let mut last_prevhash = String::new();
-    let mut poll_interval = tokio::time::interval(tokio::time::Duration::from_secs(1));
+    let mut poll_interval = tokio::time::interval(tokio::time::Duration::from_secs(10));
 
     loop {
-        poll_interval.tick().await;
+        // Wait for either ZMQ notification (instant) or poll timeout (10s fallback)
+        tokio::select! {
+            _ = poll_interval.tick() => {
+                log::debug!("Job loop: fallback poll tick");
+            }
+            Some(coin) = zmq_rx.recv() => {
+                log::info!("Job loop: ZMQ trigger from {}", coin);
+                // Drain any queued notifications to avoid redundant refreshes
+                while zmq_rx.try_recv().is_ok() {}
+            }
+        }
 
         // 1. Get parent block template
         let parent_rpc = match rpc_clients.get(&config.parent_coin().symbol) {
