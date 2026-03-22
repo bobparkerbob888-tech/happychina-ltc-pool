@@ -241,12 +241,10 @@ async function loadMinerPage() {
 
     // Workers
     var workersData = await apiFetch("/miner/" + encodeURIComponent(addr) + "/workers");
-    var bestSharesData = await apiFetch("/best-shares/" + encodeURIComponent(addr));
-    var bestShares = bestSharesData || {};
     var workersTbody = document.getElementById("workers-body");
     if (workersTbody && workersData && workersData.workers) {
         if (workersData.workers.length === 0) {
-            workersTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">No workers</td></tr>';
+            workersTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem">No workers</td></tr>';
         } else {
             var whtml = "";
             for (var k = 0; k < workersData.workers.length; k++) {
@@ -254,9 +252,7 @@ async function loadMinerPage() {
                 var statusCls = w.is_online ? "badge-online" : "badge-offline";
                 var statusTxt = w.is_online ? "Online" : "Offline";
                 whtml += '<tr>';
-                var bs = bestShares[w.name] || 0;
                 whtml += '<td class="mono">' + w.name + '</td>';
-                whtml += '<td class="mono">' + formatDifficultyShort(bs) + '</td>';
                 whtml += '<td class="mono">' + w.hashrate_formatted + '</td>';
                 whtml += '<td class="mono">' + formatNumber(w.difficulty) + '</td>';
                 whtml += '<td>' + timeAgo(w.last_seen) + '</td>';

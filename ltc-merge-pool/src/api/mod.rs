@@ -31,7 +31,6 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
             .route("/admin/pool-address", web::post().to(admin::update_pool_address))
             .route("/admin/addresses", web::get().to(admin::get_addresses))
             .route("/admin/reward-address", web::post().to(admin::update_reward_address))
-            .route("/admin/password", web::post().to(admin::update_password))
-            .route("/admin/reconcile-balances", web::post().to(admin::reconcile_balances)),
+            .route("/admin/password", web::post().to(admin::update_password)),
     );
 }
